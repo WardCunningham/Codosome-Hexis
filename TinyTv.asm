@@ -442,7 +442,7 @@ hL1:
 	mov	px1,r0		; r0 holds a stored value.
 	;removing these two alone produced strange shapes - symetrical, tho.
 
-	mov r5,r6	; unfortunately, this one alone doesn't really help!
+	mov px0,py0	; unfortunately, this one alone doesn't really help!
 	; removing just this statement still made circles, but very large ones.
 	; removing all three statments produce weird, but symetrical shapes.
 	; Best results by far are with these statments included.
