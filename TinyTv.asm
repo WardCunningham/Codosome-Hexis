@@ -93,20 +93,19 @@
 	.def py1 =r4
 	.def px0 =r5
 	.def py0 =r6
-	; saved value for r3 reload is in r0
 	.def drift = r10
 
 	.def adrsL = r23	; address pointer
 	.def adrsH = r24
 		
-	.def a =r16 	; temporary variables
+	.def a =r16 		; temporary variables
 	.def b =r17
 	.def c =r18		; Used to load px & py registers - don't use in ISR!!
 	.def line =r20
 	.def PWM_MODE = r21
 	.def PWM_MODE2 = r22	; These should be one register!
 
-	.def vs =r12 	; register constants for video generation
+	.def vs =r12 		; register constants for video generation
 	.def vb =r13
 	.def vg =r14
 	.def vw =r15
@@ -376,14 +375,13 @@ vS1:	lds	c,ADCSRA	; Hang until the ADSC bit clears
 		ldi	c,(1<<VI_TIME)
 		or 	VI_FLAGS, c
 
-		ldi	c,8
+		ldi	c,6
 		sub	drift,c
 
 ; second order coefficients
 
 		ldi	c,2
 		mov	px2,c
-
 		ldi	c,1
 		mov	py2,c
 
@@ -401,12 +399,9 @@ vS1:	lds	c,ADCSRA	; Hang until the ADSC bit clears
 
 ; zeroth order coefficients
 
-		read_adc 2	; ward's inside hand
-		mov 	px0,c
 
 		read_adc 1	; jim's inside hand
-		mov 	py0,c
-
+		read_adc 2	; ward's inside hand
 
 		mov	px0,drift
 		mov	py0,drift
@@ -433,11 +428,15 @@ hL1:
 ;---------------------------------------------------------------------
 ; Code to run on each horizontal line goes here.
 ; This is from Codosome
-	
-	mov c,py1
+
+.macro add_frac
+	mov c,@1
 	asr c
 	asr c
-	add py0,c
+	add @0,c
+.endm
+
+	add_frac py0,py1
 	add py1,py2
 
 	mov b,px1
