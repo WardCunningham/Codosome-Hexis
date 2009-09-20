@@ -110,10 +110,6 @@
 	.def vb =r13
 	.def vg =r14
 	.def vw =r15
-	;.def vs =r26 	; register constants for video generation
-	;.def vb =r27
-	;.def vg =r28
-	;.def vw =r29
 
 ;-------------------------------------------------------------------------
 .CSEG
@@ -380,37 +376,30 @@ vS1:	lds	c,ADCSRA	; Hang until the ADSC bit clears
 		ldi	c,(1<<VI_TIME)
 		or 	VI_FLAGS, c
 
+		ldi	c,8
+		mov	px2,c
+		ldi	c,1
+		mov	py2,c
 
 		read_adc 0
-		lsr		c
-		;ldi 	c,-120
+		subi	c,-80
 		mov 	py1,c
 
 		read_adc 1
-		lsr		c
-		lsr		c
-		lsr		c
-		lsr		c
-		;ldi 	c,2			; setup from Codosome - could use register constants.
-		mov 	py2,c
-
-		dec 	drift
-		mov		py0,drift
+		mov 	py0,c
 
 		read_adc 2
-		lsr		c
-		lsr		c
-		lsr		c
-		;ldi 	c,4
-		mov 	px2,c
+		mov 	px0,c
 
 		read_adc 3
-		lsr		c
-		;ldi 	c,-40
-		mov		r0,c
+		add	c,c
+		add	c,c
+		add	c,c
 		mov 	px1,c
-		;clr		py0
-		mov 	px0,py0
+
+		dec 	drift
+;		mov	px1,drift
+		mov	r0,px1
 
 Finish:
 	rjmp Finish			; wait for Interrupt
@@ -436,11 +425,8 @@ hL1:
 	
 	add py0,py1
 	add py1,py2
-				; I added the following statements to link in y values.
-	;ldi	a,-40	; stability improve, but always the same line.
-	;mov	px1,a	; correction value will always be the same.
-	mov	px1,r0		; r0 holds a stored value.
-	;removing these two alone produced strange shapes - symetrical, tho.
+
+	mov px1,r0		; r0 holds a stored value.
 
 	mov px0,py0	; unfortunately, this one alone doesn't really help!
 	; removing just this statement still made circles, but very large ones.
@@ -450,13 +436,12 @@ hL1:
 tl1:
 	add 	px1,px2	; swap order of these two statements
 	add 	px0,px1	; Circles work now! This is crucial change!!
+
 	brpl 	tl2
-	;out 	porta,r29
 	out 	portb,r15
 	nop
 	rjmp 	tl1
 tl2:
-	;out 	porta,r27
 	out 	portb,r13
 	rjmp 	tl1
 
