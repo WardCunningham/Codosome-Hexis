@@ -377,29 +377,40 @@ vS1:	lds	c,ADCSRA	; Hang until the ADSC bit clears
 		or 	VI_FLAGS, c
 
 		ldi	c,8
+		sub	drift,c
+
+; second order coefficients
+
+		ldi	c,2
 		mov	px2,c
+
 		ldi	c,1
 		mov	py2,c
 
-		read_adc 0
-		subi	c,-80
-		mov 	py1,c
+; first order coefficients
 
-		read_adc 1
-		mov 	py0,c
-
-		read_adc 2
-		mov 	px0,c
-
-		read_adc 3
-		add	c,c
+		read_adc 3	; ward's outside hand
 		add	c,c
 		add	c,c
 		mov 	px1,c
 
-		dec 	drift
-;		mov	px1,drift
-		mov	r0,px1
+		read_adc 0	; jim's outside hand
+		add	c,c
+		mov 	py1,c
+
+
+; zeroth order coefficients
+
+		read_adc 2	; ward's inside hand
+		mov 	px0,c
+
+		read_adc 1	; jim's inside hand
+		mov 	py0,c
+
+
+		mov	px0,drift
+		mov	py0,drift
+
 
 Finish:
 	rjmp Finish			; wait for Interrupt
@@ -423,19 +434,19 @@ hL1:
 ; Code to run on each horizontal line goes here.
 ; This is from Codosome
 	
-	add py0,py1
+	mov c,py1
+	asr c
+	asr c
+	add py0,c
 	add py1,py2
 
-	mov px1,r0		; r0 holds a stored value.
-
-	mov px0,py0	; unfortunately, this one alone doesn't really help!
-	; removing just this statement still made circles, but very large ones.
-	; removing all three statments produce weird, but symetrical shapes.
-	; Best results by far are with these statments included.
+	mov b,px1
+	mov a,px0
+	add a,py0
 
 tl1:
-	add 	px1,px2	; swap order of these two statements
-	add 	px0,px1	; Circles work now! This is crucial change!!
+	add 	b,px2
+	add 	a,b
 
 	brpl 	tl2
 	out 	portb,r15
