@@ -359,6 +359,11 @@ vIntrvl:
 
 vSetup:
 
+.macro read_adc
+
+.endm
+
+
 ; Must set Vertical INterval Flag for ISRs.
 			ldi		c,(1<<VI_TIME)
 			or		VI_FLAGS, c
@@ -366,7 +371,7 @@ vSetup:
 
 			lds		c,ADMUX		; Read ADMUX
 			andi	c,0xE0		; Clear channel number
-			;ori		c,0x00		; New channel number
+			ori		c,0x00		; New channel number
 			sts		ADMUX,c		; Put back in ADMUX
 		
 			lds		c,ADCSRA	; set bit ADSC to start conversion.
