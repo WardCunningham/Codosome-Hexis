@@ -87,14 +87,14 @@
 ;========================================================================
 ;	This from Ward's code.
 ;========================================================================
-	.def px2 =r1		; from Codosome - but these names aren't used.
+	.def px2 =r1		; from Codosome - and they are now used.
 	.def py2 =r2
 	.def px1 =r3
 	.def py1 =r4
 	.def px0 =r5
 	.def py0 =r6
 	; saved value for r3 reload is in r0
-	.def R6_VAL = r10
+	.def drift = r10
 
 	.def adrsL = r23	; address pointer
 	.def adrsH = r24
@@ -360,103 +360,61 @@ vIntrvl:
 vSetup:
 
 .macro read_adc
+	lds	c,ADMUX		; Read ADMUX
+	andi	c,0xE0		; Clear channel number
+	ori	c,@0		; New channel number
+	sts	ADMUX,c		; Put back in ADMUX
 
+	lds	c,ADCSRA	; set bit ADSC to start conversion.
+	ori	c,(1<<ADSC)
+	sts	ADCSRA,c
+
+vS1:	lds	c,ADCSRA	; Hang until the ADSC bit clears
+	sbrc	c, ADSC
+	rjmp	vS1
+	lds			c,ADCH	; Read the value
 .endm
 
 
 ; Must set Vertical INterval Flag for ISRs.
-			ldi		c,(1<<VI_TIME)
-			or		VI_FLAGS, c
+		ldi	c,(1<<VI_TIME)
+		or 	VI_FLAGS, c
 
 
-			lds		c,ADMUX		; Read ADMUX
-			andi	c,0xE0		; Clear channel number
-			ori		c,0x00		; New channel number
-			sts		ADMUX,c		; Put back in ADMUX
-		
-			lds		c,ADCSRA	; set bit ADSC to start conversion.
-			ori		c,(1<<ADSC)
-			sts		ADCSRA,c
-vS1:		lds		c,ADCSRA	; Hang until the ADSC bit clears
-			sbrc	c, ADSC
-			rjmp	vS1
-
-		lds			c,ADCH	; Read the value
-;		lsr		c
-;		lsr		c
-;		lsr		c
+		read_adc 0
 		lsr		c
 		;ldi 	c,-120
-		mov 	r4,c
+		mov 	py1,c
 
-			lds		c,ADMUX		; Read ADMUX
-			andi	c,0xE0		; Clear channel number
-			ori		c,0x01		; New channel number
-			sts		ADMUX,c		; Put back in ADMUX
-		
-			lds		c,ADCSRA	; set bit ADSC to start conversion.
-			ori		c,(1<<ADSC)
-			sts		ADCSRA,c
-vS1a:		lds		c,ADCSRA	; Hang until the ADSC bit clears
-			sbrc	c, ADSC
-			rjmp	vS1a
-
-		lds			c,ADCH	; Read the value
+		read_adc 1
 		lsr		c
 		lsr		c
 		lsr		c
 		lsr		c
 		;ldi 	c,2			; setup from Codosome - could use register constants.
-		mov 	r2,c
+		mov 	py2,c
 
-		dec 	R6_VAL
-		mov		r6,R6_VAL
+		dec 	drift
+		mov		py0,drift
 
-			lds		c,ADMUX		; Read ADMUX
-			andi	c,0xE0		; Clear channel number
-			ori		c,0x02		; New channel number
-			sts		ADMUX,c		; Put back in ADMUX
-		
-			lds		c,ADCSRA	; set bit ADSC to start conversion.
-			ori		c,(1<<ADSC)
-			sts		ADCSRA,c
-vS1b:		lds		c,ADCSRA	; Hang until the ADSC bit clears
-			sbrc	c, ADSC
-			rjmp	vS1b
-
-		lds			c,ADCH	; Read the value
+		read_adc 2
 		lsr		c
-;		lsr		c
 		lsr		c
 		lsr		c
 		;ldi 	c,4
-		mov 	r1,c
+		mov 	px2,c
 
-			lds		c,ADMUX		; Read ADMUX
-			andi	c,0xE0		; Clear channel number
-			ori		c,0x03		; New channel number
-			sts		ADMUX,c		; Put back in ADMUX
-		
-			lds		c,ADCSRA	; set bit ADSC to start conversion.
-			ori		c,(1<<ADSC)
-			sts		ADCSRA,c
-vS1c:		lds		c,ADCSRA	; Hang until the ADSC bit clears
-			sbrc	c, ADSC
-			rjmp	vS1c
-
-		lds			c,ADCH	; Read the value
-;		lsr		c
-;		lsr		c
-;		lsr		c
+		read_adc 3
 		lsr		c
 		;ldi 	c,-40
 		mov		r0,c
-		mov 	r3,c
-		;clr		r6
-		mov 	r5,r6
+		mov 	px1,c
+		;clr		py0
+		mov 	px0,py0
 
 Finish:
 	rjmp Finish			; wait for Interrupt
+
 ; Vertical Interval Code Ends Here.
 ;*********************************************************************
 
@@ -476,12 +434,12 @@ hL1:
 ; Code to run on each horizontal line goes here.
 ; This is from Codosome
 	
-	add r6,r4
-	add r4,r2
+	add py0,py1
+	add py1,py2
 				; I added the following statements to link in y values.
 	;ldi	a,-40	; stability improve, but always the same line.
-	;mov	r3,a	; correction value will always be the same.
-	mov	r3,r0		; r0 holds a stored value.
+	;mov	px1,a	; correction value will always be the same.
+	mov	px1,r0		; r0 holds a stored value.
 	;removing these two alone produced strange shapes - symetrical, tho.
 
 	mov r5,r6	; unfortunately, this one alone doesn't really help!
@@ -490,8 +448,8 @@ hL1:
 	; Best results by far are with these statments included.
 
 tl1:
-	add 	r3,r1	; swap order of these two statements
-	add 	r5,r3	; Circles work now! This is crucial change!!
+	add 	px1,px2	; swap order of these two statements
+	add 	px0,px1	; Circles work now! This is crucial change!!
 	brpl 	tl2
 	;out 	porta,r29
 	out 	portb,r15
@@ -501,6 +459,7 @@ tl2:
 	;out 	porta,r27
 	out 	portb,r13
 	rjmp 	tl1
+
 ;  Horizontal line code ends here.
 ;-------------------------------------------------------------------------
 ;*********************************************************************
