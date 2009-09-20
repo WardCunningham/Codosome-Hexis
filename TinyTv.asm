@@ -377,9 +377,9 @@ vS1:		lds		c,ADCSRA	; Hang until the ADSC bit clears
 			rjmp	vS1
 
 		lds			c,ADCH	; Read the value
-		lsr		c
-		lsr		c
-		lsr		c
+;		lsr		c
+;		lsr		c
+;		lsr		c
 		lsr		c
 		;ldi 	c,-120
 		mov 	r4,c
@@ -404,7 +404,7 @@ vS1a:		lds		c,ADCSRA	; Hang until the ADSC bit clears
 		;ldi 	c,2			; setup from Codosome - could use register constants.
 		mov 	r2,c
 
-		inc 	R6_VAL
+		dec 	R6_VAL
 		mov		r6,R6_VAL
 
 			lds		c,ADMUX		; Read ADMUX
@@ -421,7 +421,7 @@ vS1b:		lds		c,ADCSRA	; Hang until the ADSC bit clears
 
 		lds			c,ADCH	; Read the value
 		lsr		c
-		lsr		c
+;		lsr		c
 		lsr		c
 		lsr		c
 		;ldi 	c,4
@@ -440,9 +440,9 @@ vS1c:		lds		c,ADCSRA	; Hang until the ADSC bit clears
 			rjmp	vS1c
 
 		lds			c,ADCH	; Read the value
-		lsr		c
-		lsr		c
-		lsr		c
+;		lsr		c
+;		lsr		c
+;		lsr		c
 		lsr		c
 		;ldi 	c,-40
 		mov		r0,c
