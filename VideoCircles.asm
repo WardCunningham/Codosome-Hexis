@@ -1,6 +1,6 @@
 ;--------------------------------------------------------------------
 ;
-;	TvCircles4 - Third try at a TV circles program ala Ward. This version
+;	VideoCircles v4  - Third try at a TV circles program ala Ward. This version
 ;		uses A/D to read values for parameters and is for the Teensy++.  
 ;		It will flash a LED twice at start and draw circles using code 
 ;		from Codosome. 
@@ -10,7 +10,7 @@
 ;		Equalizers are sync width, not half that width. Uses 525 line frame.
 ;--------------------------------------------------------------------
 ;
-;	TvCircles - TV circles program From Codosome work by Ward Cunningham.
+;	VideoCircles - TV circles program From Codosome work by Ward Cunningham.
 ;		Flashes a LED twice at start, has full interlaced NTSC video.
 ;		Uses Port A0 and A1 for video output.
 ;	Register Usage:
@@ -21,7 +21,7 @@
 ;		R18, R19 (available after initialization)
 ;		Port A0 and A1 (video)
 ;		Port B6 (LED) (could be deleted)
-;	Needed for Codosome TvCircles App - Available for Application
+;	Needed for Codosome VideoCircles App - Available for Application
 ;		R0-R6, R16-R18 (overlap is OK)
 ;		R13 & R15 video levels are output.
 ;
