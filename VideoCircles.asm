@@ -17,14 +17,14 @@
 ;	VideoCircles - TV circles program From Codosome work by Ward Cunningham.
 ;		Flashes a LED twice at start, has full interlaced NTSC video.
 ;		Uses Port A0 and A1 for video output.
+;
 ;	Register Usage:
-;	Needed for TV support (Initialization, LED blinks and ISRs)
+;	Needed for TV support (Initialization and ISRs)
 ;		R9, R10, R20 - R24 (don't use)
 ;		R12-R15 - Video levels shouldn't be changed, but are output values.
 ;		R16, R17 (available outside ISRs, but clobbered),
-;		R18, R19 (available after initialization)
+;		R18 (available after initialization)
 ;		Port A0 and A1 (video)
-;		Port B6 (LED) (could be deleted)
 ;	Needed for Codosome VideoCircles App - Available for Application
 ;		R0-R6, R16-R18 (overlap is OK)
 ;		R13 & R15 video levels are output.
@@ -59,43 +59,47 @@
 
 ; Define Control Flags for Vertical Interval
 ; NOTE: bit 0 is the restart flag
-.equ	VI_TIME		=	0x01
-.equ	VI_2X_RATE	=	0x02
-.equ	VI_BROAD_TIME =	0x03
 
-.def	VI_FLAGS	=	r9
+	.equ VI_TIME		=0x01
+	.equ VI_2X_RATE		=0x02
+	.equ VI_BROAD_TIME	=0x03
+
+; Output pins for video (two bits)
+
+	.set vl		=0 
+	.set vh		=1
+
+
 ;========================================================================
-;	This from Ward's code.
+;	Register Allocations
 ;========================================================================
 
-	.set vl =0	; video pins and codes
-	.set vh =1
-
-;========================================================================
-;	This from Ward's code.
-;========================================================================
-	.def px2	=r1	; from Codosome - and they are now used.
+	.def px2	=r1	; polynomial coefficients
 	.def py2	=r2
 	.def px1	=r3
 	.def py1	=r4
 	.def px0	=r5
 	.def py0	=r6
+
+	.def VI_FLAGS	=r9
 	.def drift	=r10
-
-	.def adrsL	=r23	; address pointer
-	.def adrsH	=r24
-
-	.def a		=r16 	; temporary variables
-	.def b		=r17
-	.def c		=r18	; Used to load px & py registers - don't use in ISR!!
-	.def line	=r20
-	.def PWM_MODE	=r21
-	.def PWM_MODE2	=r22	; These should be one register!
 
 	.def vs		=r12 	; register constants for video generation
 	.def vb		=r13
 	.def vg		=r14
 	.def vw		=r15
+
+	.def a		=r16 	; temporary variables
+	.def b		=r17
+	.def c		=r18	; Used to load px & py registers - don't use in ISR!!
+
+	.def line	=r20
+	.def PWM_MODE	=r21
+	.def PWM_MODE2	=r22	; These should be one register!
+	.def adrsL	=r23	; address pointer
+	.def adrsH	=r24
+
+
 
 ;-------------------------------------------------------------------------
 
@@ -362,6 +366,7 @@ vS1:	lds	c,ADCSRA	; Hang until the ADSC bit clears
 
 
 ; Must set Vertical INterval Flag for ISRs.
+
 	ldi	c,(1<<VI_TIME)
 	or 	VI_FLAGS, c
 
