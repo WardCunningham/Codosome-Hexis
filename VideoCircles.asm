@@ -26,7 +26,7 @@
 ;		R18 (available after initialization)
 ;		Port A0 and A1 (video)
 ;	Needed for Codosome VideoCircles App - Available for Application
-;		R0-R6, R16-R18 (overlap is OK)
+;		R1-R6, R16-R18 (overlap is OK)
 ;		R13 & R15 video levels are output.
 ;
 ;	The vertical interval runs entirely
