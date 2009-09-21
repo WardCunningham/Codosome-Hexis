@@ -8,6 +8,10 @@
 ;	The vertical interval runs entirely
 ;		on interrupts and has double rate for Equalizers and Broad Pulses.
 ;		Equalizers are sync width, not half that width. Uses 525 line frame.
+;
+;	This software is (c) 2009 Ward Cunningham and Jim Larson
+;	Released under GPL v2 or later
+;
 ;--------------------------------------------------------------------
 ;
 ;	VideoCircles - TV circles program From Codosome work by Ward Cunningham.
