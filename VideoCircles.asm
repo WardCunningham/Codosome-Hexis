@@ -54,12 +54,6 @@
 ;------------------------------------------------------------------------
 .include "usb646def.inc"
 
-;------------------------------------------------------------------------
-;  Button and LED Port assignments
-;------------------------------------------------------------------------
-.equ	PORT_LED	=	PORTD
-.equ	DDR_LED		=	DDRD
-.equ	P_LED_1	=		PD6		; The LED pin
 
 ; Defines for A/D Conversion (maybe)
 
@@ -76,17 +70,6 @@
 
 	.set vl =0	; video pins and codes
 	.set vh =1
-
-;------------------------------------------------------------------------
-; Register assignments
-;	Even though these names overlap Ward's, they shouldn't cause conflicts
-;	because of the way I use them (not in the main loop).
-;------------------------------------------------------------------------
-
-	.def Temp	=r16
-	.def Times	=r17
-	.def Delay1	=r18
-	.def Delay2	=r19
 
 ;========================================================================
 ;	This from Ward's code.
@@ -135,21 +118,16 @@ my_RESET:
 	sts	CLKPR,a		; enable write
 	sts	CLKPR,b		; write new value
 
-; Initialize Ports
-
-	ldi	 Temp, (1<<P_LED_1)
-	out	 DDR_LED,Temp	; Make LED port an output
-
 ; Initialize A/D
 
-	ldi	 Temp, (1<< ADLAR) | 0x40 ; select AVCC as ref
-	sts	 ADMUX, Temp
+	ldi	 a, (1<< ADLAR) | 0x40 ; select AVCC as ref
+	sts	 ADMUX, a
 
 ; Enable A/D, select prescale of 64
 ; Leave REFS1 & 0 at 0 - selects Vcc as reference.
 
-	ldi	Temp, (1<<ADEN) | 0x03 ; try faster clock -- Made things much more stable!
-	sts	ADCSRA, Temp
+	ldi	a, (1<<ADEN) | 0x03 ; try faster clock -- Made things much more stable!
+	sts	ADCSRA, a
 
 ; init constants for video levels
 
@@ -162,9 +140,6 @@ my_RESET:
 	ldi	a,(1<<vl)+(1<<vh)
 	mov	vw,a
 	out	ddrb,vw		; outputs for video
-
-	ldi	Times, 2	; Blink LED Twice
-	rcall	BlinkEm
 
 ; Set up Counter/Timer 1
 ;
@@ -471,39 +446,6 @@ tl2:
 ;  Horizontal line code ends here.
 ;-------------------------------------------------------------------------
 ;*********************************************************************
-
-
-;-------------------------------------------------------------------------
-;	BlinkEm: Subroutine blinks LED the number of times in Times
-;	For Teensy++, low on LED turns it on (using onboard LED).
-;-------------------------------------------------------------------------
-BlinkEm:
-	;sbi	PORT_LED,P_LED_1	; Turn on the LED
-	cbi	PORT_LED,P_LED_1
-	ldi    	Delay1,0xff
-	rcall	Delay
-	ldi	Delay1,0xff
-	rcall	Delay
-	;cbi	PORT_LED,P_LED_1	; Turn off the LED
-	sbi	PORT_LED,P_LED_1
-	ldi	Delay1,0xff
-	rcall	Delay
-	ldi	Delay1,0xff
-	rcall	Delay
-	dec	Times
-	brne	BlinkEm
-	ret
-;-------------------------------------------------------------------------
-;	Delay: Subroutine delays time in Delay1. Uses Delay2.
-;-------------------------------------------------------------------------
-Delay:
-d1:
-	ldi	Delay2,0xff
-d1a:	dec	Delay2
-	brne	d1a
-	dec		Delay1
-	brne	d1
-	ret
 
 
 ;-----------------------------------------------------------
